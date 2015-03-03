@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nvsoft/cef"
+	"github.com/nvsoft/goapp/config"
 	"github.com/nvsoft/win"
 	"os"
 	"syscall"
 	"unsafe"
-	"github.com/nvsoft/goapp/config"
 )
 
 const (
@@ -22,6 +22,7 @@ var (
 )
 
 var wndProc = syscall.NewCallback(WndProc)
+var browserSettings = cef.BrowserSettings{}
 
 func init() {
 	hInstance := win.GetModuleHandle(nil)
@@ -47,9 +48,12 @@ func main() {
 	//settings.RemoteDebuggingPort = 7000
 	cef.Initialize(settings)
 
-	renderWindow := createMainWindow()
+    renderWindow := createMainWindow()
+    //renderWindow1 := createMainWindow()
+
 	go func() {
 		createBrowser(renderWindow, manifest.FirstPage()) // http://www.baidu.com/
+        //createBrowser(renderWindow1, "http://www.sohu.com/") // http://www.baidu.com/
 	}()
 
 	//go func() {
@@ -106,7 +110,7 @@ func createMainWindow() win.HWND {
 
 func createBrowser(renderWindow win.HWND, url string) {
 	//browser := cef.CreateBrowser(unsafe.Pointer(hwnd), &browserSettings, url, false)
-	browserSettings := cef.BrowserSettings{}
+	//browserSettings := cef.BrowserSettings{}
 	cef.CreateBrowser(unsafe.Pointer(renderWindow), &browserSettings, url, false)
 
 	//m_dwStyle = WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP |

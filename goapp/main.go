@@ -8,7 +8,7 @@ import (
 	"os"
 	"syscall"
 	"unsafe"
-	"goapp/config"
+	"github.com/nvsoft/goapp/config"
 )
 
 const (
@@ -49,7 +49,7 @@ func main() {
 
 	renderWindow := createMainWindow()
 	go func() {
-		createBrowser(renderWindow, "about:blank") // http://www.baidu.com/
+		createBrowser(renderWindow, manifest.FirstPage()) // http://www.baidu.com/
 	}()
 
 	//go func() {

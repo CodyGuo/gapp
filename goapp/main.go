@@ -11,6 +11,7 @@ import (
 	"unsafe"
     //. "time"
     "runtime"
+    "time"
 )
 
 const (
@@ -82,11 +83,11 @@ func main() {
 }
 
 func createRootWindow() {
-    renderWindow := createMainWindow()
+    renderWindow := _createRootWindow()
     createBrowser(renderWindow, manifest.FirstPage()) // http://www.baidu.com/
 }
 
-func createMainWindow() win.HWND {
+func _createRootWindow() win.HWND {
 	var dwExStyle, dwStyle uint32 = 0, 0
 
 	dwStyle = win.WS_OVERLAPPEDWINDOW
@@ -122,11 +123,14 @@ func createMainWindow() win.HWND {
 		return win.HWND(0)
 	}
 
-	win.MoveWindow(renderWindow, x, y, width, height, false)
+	//win.MoveWindow(renderWindow, x, y, width, height, false)
 
 	fmt.Printf("CreateWindow x=%v, y=%v, width=%v, height=%v, renderWindow=%v\n", x, y, width, height, renderWindow)
 
     //winHandlers[unsafe.Pointer(renderWindow)] = renderWindow
+
+    win.ShowWindow(renderWindow, win.SW_SHOW) //win.SW_SHOW
+    win.UpdateWindow(renderWindow)
 
 	return renderWindow
 }
@@ -141,15 +145,14 @@ func createBrowser(renderWindow win.HWND, url string) {
 	//		WS_VISIBLE;
 	cef.WindowResized(unsafe.Pointer(renderWindow))
 
-	win.ShowWindow(renderWindow, win.SW_SHOW) //win.SW_SHOW
-	win.UpdateWindow(renderWindow)
+    //cef.WindowResized(unsafe.Pointer(renderWindow))
 
 	//cef.WindowResized(unsafe.Pointer(renderWindow))
 	// It should be enough to call WindowResized after 10ms,
 	// though to be sure let's extend it to 100ms.
-	//time.AfterFunc(time.Millisecond*100, func() {
-	//	cef.WindowResized(unsafe.Pointer(renderWindow))
-	//})
+	time.AfterFunc(time.Millisecond*100, func() {
+		//cef.WindowResized(unsafe.Pointer(renderWindow))
+	})
 }
 
 func WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr) (result uintptr) {
@@ -158,9 +161,9 @@ func WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr) (result uintptr)
 		result = win.DefWindowProc(hwnd, msg, wParam, lParam)
 	case win.WM_SIZE:
 		// 最小化时不能调整Cef窗体，否则恢复时界面一片空白
-		if wParam == win.SIZE_RESTORED || wParam == win.SIZE_MAXIMIZED {
+		//if wParam == win.SIZE_RESTORED || wParam == win.SIZE_MAXIMIZED {
 			cef.WindowResized(unsafe.Pointer(hwnd))
-		}
+		//}
 	case win.WM_CLOSE:
 		win.DestroyWindow(hwnd)
 	case win.WM_DESTROY:

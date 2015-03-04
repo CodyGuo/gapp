@@ -10,6 +10,7 @@ import (
 	"strings"
 	//"syscall"
 	"time"
+    "io/ioutil"
 )
 
 func working() {
@@ -33,7 +34,11 @@ func doIt(browser *cef.Browser) {
 
 	src := browser.GetSource()
 
+    ioutil.WriteFile("a.txt", []byte(src), 0644)
+
 	fmt.Printf("src=%v\n", len(src))
+
+    time.Sleep(200 * time.Second)
 
 	//js := `function() { return "1"; }();`
 	//browser.Eval(js)

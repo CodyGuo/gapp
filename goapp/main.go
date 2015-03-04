@@ -9,11 +9,13 @@ import (
 	"os"
 	"syscall"
 	"unsafe"
+    //. "time"
+    "runtime"
 )
 
 const (
 	ICON_MAIN       = 100
-	nguiWindowClass = `\o/ NGui_Window_Class \o/`
+	nguiWindowClass = `\o/ Goapp_Window_Class \o/`
 )
 
 var (
@@ -23,6 +25,7 @@ var (
 
 var wndProc = syscall.NewCallback(WndProc)
 var browserSettings = cef.BrowserSettings{}
+var winHandlers map[unsafe.Pointer]win.HWND
 
 func init() {
 	hInstance := win.GetModuleHandle(nil)
@@ -36,7 +39,10 @@ func init() {
 }
 
 func main() {
-	cef.ExecuteProcess(unsafe.Pointer(hInstance))
+    runtime.GOMAXPROCS(4)
+    cef.ExecuteProcess(unsafe.Pointer(hInstance))
+
+    cef.SetupCreateRootWindowCallback(createRootWindow)
 
 	settings := cef.Settings{}
 	//settings.SingleProcess = 1                     // 单进程模式
@@ -48,13 +54,23 @@ func main() {
 	//settings.RemoteDebuggingPort = 7000
 	cef.Initialize(settings)
 
-    renderWindow := createMainWindow()
+    //renderWindow := createMainWindow()
+    //renderWindow1 := createMainWindow()
     //renderWindow1 := createMainWindow()
 
 	go func() {
-		createBrowser(renderWindow, manifest.FirstPage()) // http://www.baidu.com/
+        //createMainBrowser()
+        //renderWindow := createMainWindow()
+        //createBrowser(renderWindow, manifest.FirstPage())
         //createBrowser(renderWindow1, "http://www.sohu.com/") // http://www.baidu.com/
 	}()
+
+    /*go func() {
+        time.Sleep(5 * time.Second)
+        go func() {
+            createBrowser(renderWindow1, "http://www.sohu.com/")
+        }()
+    }()*/
 
 	//go func() {
 	//	working()
@@ -63,6 +79,11 @@ func main() {
 	cef.RunMessageLoop()
 	cef.Shutdown()
 	os.Exit(0)
+}
+
+func createRootWindow() {
+    renderWindow := createMainWindow()
+    createBrowser(renderWindow, manifest.FirstPage()) // http://www.baidu.com/
 }
 
 func createMainWindow() win.HWND {
@@ -103,12 +124,15 @@ func createMainWindow() win.HWND {
 
 	win.MoveWindow(renderWindow, x, y, width, height, false)
 
-	fmt.Printf("CreateWindow x=%v, y=%v, width=%v, height=%v\n", x, y, width, height)
+	fmt.Printf("CreateWindow x=%v, y=%v, width=%v, height=%v, renderWindow=%v\n", x, y, width, height, renderWindow)
+
+    //winHandlers[unsafe.Pointer(renderWindow)] = renderWindow
 
 	return renderWindow
 }
 
 func createBrowser(renderWindow win.HWND, url string) {
+    //winHandlers[unsafe.Pointer(renderWindow)] = renderWindow
 	//browser := cef.CreateBrowser(unsafe.Pointer(hwnd), &browserSettings, url, false)
 	//browserSettings := cef.BrowserSettings{}
 	cef.CreateBrowser(unsafe.Pointer(renderWindow), &browserSettings, url, false)

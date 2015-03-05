@@ -1,0 +1,4 @@
+{
+  	"static_root": "../static/app/",
+  	"listen_address": ":9090"
+}

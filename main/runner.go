@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 	//"syscall"
+	"io/ioutil"
 	"time"
-    "io/ioutil"
 )
 
 func working() {
@@ -34,18 +34,18 @@ func doIt(browser *cef.Browser) {
 
 	src := browser.GetSource()
 
-    ioutil.WriteFile("a.txt", []byte(src), 0644)
+	ioutil.WriteFile("a.txt", []byte(src), 0644)
 
 	fmt.Printf("src=%v\n", len(src))
 
-    time.Sleep(200 * time.Second)
+	time.Sleep(200 * time.Second)
 
 	//js := `function() { return "1"; }();`
 	//browser.Eval(js)
 
 	// 执行Js
 	//browser.ExecuteJavaScript(`app.cefResult("a");`, "", 1)
-	result := browser.ExecuteJavaScriptWithResult(`(function() { app.cefResult("13"); })();`)
+	result := browser.ExecuteJavaScriptWithResult(`(function() { cef.setResult("13"); })();`)
 	fmt.Printf("Eval Js. result=%v\n", result)
 
 	//browser.InjectJs("js/jquery.min.js")
@@ -132,7 +132,7 @@ func doIt(browser *cef.Browser) {
     }
     var e = document.querySelector("input[name=wd]");
     var offset = getOffset(e);
-    app.cefResult(offset.left + "," + offset.top);
+    cef.setResult(offset.left + "," + offset.top);
     `
 	strOffset := browser.ExecuteJavaScriptWithResult(code)
 	fmt.Printf("strOffset:%v\n", strOffset)

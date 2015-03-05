@@ -6,7 +6,7 @@ goto end
 
 :ok
 
-cd goapp
+cd main
 
 @if exist "main-res.syso" (
     @del "main-res.syso"
@@ -29,6 +29,9 @@ IF "%1"=="noconsole" (
 
 cd ..\browser
 go build -o ../bin/browser.exe
+
+cd ..\appserver
+go build -o ../bin/appserver.exe
 
 cd ../bin
 goapp.exe

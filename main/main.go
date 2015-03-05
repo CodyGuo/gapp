@@ -6,12 +6,12 @@ import (
 	"github.com/nvsoft/cef"
 	"github.com/nvsoft/goapp/config"
 	"github.com/nvsoft/win"
+	"net/http"
 	"os"
+	"runtime"
 	"syscall"
 	"unsafe"
-	//. "time"
-	"runtime"
-	"time"
+	//"time"
 )
 
 const (
@@ -27,6 +27,7 @@ var (
 var wndProc = syscall.NewCallback(WndProc)
 var browserSettings = cef.BrowserSettings{}
 var winHandlers map[unsafe.Pointer]win.HWND
+var windowHolders map[string]win.HWND
 
 func init() {
 	hInstance := win.GetModuleHandle(nil)
@@ -36,12 +37,23 @@ func init() {
 
 	MustRegisterWindowClass(nguiWindowClass)
 
+	windowHolders = make(map[string]win.HWND)
+
 	manifest.Load()
 }
 
 func main() {
 	runtime.GOMAXPROCS(4)
-	cef.ExecuteProcess(unsafe.Pointer(hInstance))
+
+	exitCode := cef.ExecuteProcess(unsafe.Pointer(hInstance))
+	if exitCode >= 0 {
+		return
+	}
+
+	// 启动本地Web服务器
+	go func() {
+		startAppServer()
+	}()
 
 	cef.SetupCreateRootWindowCallback(createRootWindow)
 	cef.SetupCreateWindowCallback(createWindow)
@@ -83,9 +95,19 @@ func main() {
 	os.Exit(0)
 }
 
+func startAppServer() error {
+	staticHandler := http.FileServer(http.Dir(config.Config["static_root"]))
+	http.Handle("/", http.StripPrefix("/", staticHandler))
+
+	fmt.Printf("Starting server on port %s\n", config.Config["listen_address"])
+
+	return http.ListenAndServe(config.Config["listen_address"], nil)
+}
+
 func createWindow(url string) {
 	renderWindow := _createRootWindow()
 	createBrowser(renderWindow, url)
+	windowHolders[url] = renderWindow
 }
 
 func createRootWindow() {
@@ -131,7 +153,7 @@ func _createRootWindow() win.HWND {
 
 	//win.MoveWindow(renderWindow, x, y, width, height, false)
 
-	fmt.Printf("CreateWindow x=%v, y=%v, width=%v, height=%v, renderWindow=%v\n", x, y, width, height, renderWindow)
+	fmt.Printf("CreateWindow x=%v y=%v width=%v height=%v renderWindow=%v renderWindow=%v\n", x, y, width, height, renderWindow, unsafe.Pointer(renderWindow))
 
 	//winHandlers[unsafe.Pointer(renderWindow)] = renderWindow
 
@@ -156,9 +178,9 @@ func createBrowser(renderWindow win.HWND, url string) {
 	//cef.WindowResized(unsafe.Pointer(renderWindow))
 	// It should be enough to call WindowResized after 10ms,
 	// though to be sure let's extend it to 100ms.
-	time.AfterFunc(time.Millisecond*100, func() {
-		//cef.WindowResized(unsafe.Pointer(renderWindow))
-	})
+	//time.AfterFunc(time.Millisecond*100, func() {
+	//cef.WindowResized(unsafe.Pointer(renderWindow))
+	//})
 }
 
 func WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr) (result uintptr) {

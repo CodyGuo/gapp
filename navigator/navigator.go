@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nvsoft/cef"
 	"github.com/nvsoft/win"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -15,6 +16,18 @@ import (
 func InjectFocus(b *cef.Browser, focus bool) {
 	h := b.GetHost()
 	h.SetFocus(focus)
+}
+
+// http://stackoverflow.com/questions/3720968/win32-simulate-a-click-without-simulating-mouse-movement
+func MouseClick(hWnd win.HWND, x, y int) {
+	var pt win.POINT
+	pt.X = int32(x) // This is your click coordinates
+	pt.Y = int32(y)
+
+	//hWnd = win.WindowFromPoint(pt)
+	lParam := uintptr(win.MAKELONG(uint16(pt.X), uint16(pt.Y)))
+	win.PostMessage(hWnd, win.WM_LBUTTONDOWN, win.MK_LBUTTON, lParam)
+	win.PostMessage(hWnd, win.WM_LBUTTONUP, win.MK_LBUTTON, lParam)
 }
 
 // 模拟鼠标点击
@@ -73,4 +86,38 @@ func InjectKey(h *cef.BrowserHost, key string) {
 	event.NativeKeyCode = int(uint32(event.NativeKeyCode) | 0xC0000000)
 	event.Type = cef.KEYEVENT_KEYUP
 	h.SendKeyEvent(&event)
+}
+
+// 获取Html原始坐标
+func GetHtmlElementOffset(frame *cef.CefFrame, selector string) (left, top int) {
+	js := `
+    function getOffset( el ) {
+        var _x = 0;
+        var _y = 0;
+        while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+            _x += el.offsetLeft - el.scrollLeft;
+            _y += el.offsetTop - el.scrollTop;
+            // chrome/safari
+            //if ($.browser.webkit) {
+                el = el.parentNode;
+            //} else {
+                // firefox/IE
+                //el = el.offsetParent;
+            //}
+        }
+        return { left: _x, top: _y };
+    }
+    var e = document.querySelector("` + selector + `");
+    var offset = getOffset(e);
+    cef.setResult(offset.left + "," + offset.top);
+    `
+	strOffset := frame.ExecuteJavaScriptWithResult(js)
+
+	ss := strings.Split(strOffset, ",")
+
+	if len(ss) == 2 {
+		left, _ = strconv.Atoi(ss[0])
+		top, _ = strconv.Atoi(ss[1])
+	}
+	return
 }

@@ -1,5 +1,5 @@
 {
-  "first_page": "http://www.baidu.com/",
+  "first_page": "http://localhost:9090/",
   "application_title": "goapp",
   "version": "1.0",
   "browser_subprocess_path": "browser.exe",

@@ -1,6 +1,16 @@
 <div class="container">
     <h3>功能演示</h3>
-    Url:<input type="text" ng-model="option.url" />
+    Url: <input type="text" ng-model="option.url" />
     <a ng-click="loadPage()" class="btn">打开窗口</a>
+    <a ng-click="start()" class="btn">开始</a>
+    <p />
+    坐标 X:<input type="number" ng-model="position.x" />
+    Y:<input type="number" ng-model="position.y" />
+    鼠标右键:
+    <input type="checkbox" ng-model="option.buttonType" />
+    <a ng-click="emuClick()" class="btn">模拟点击</a>
+    <p />
+    文字:<input type="text" ng-model="option.inputText" />
+    <a ng-click="emuInput()" class="btn">模拟输入</a>
 </div>
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/nvsoft/goapp/config"
+	"github.com/nvsoft/gapp/config"
 	"log"
 	"net/http"
 )

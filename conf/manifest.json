@@ -1,6 +1,6 @@
 {
   "first_page": "http://localhost:9090/",
-  "application_title": "goapp",
+  "application_title": "gapp",
   "version": "1.0",
   "browser_subprocess_path": "browser.exe",
   "locale": "zh-CN",

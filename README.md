@@ -1,4 +1,4 @@
-# goapp
+# gapp
 基于CEF3和Go语言的桌面应用程序框架。
 
 # 如何编译 (Win7 32/64-bit)
@@ -9,7 +9,7 @@
    Copy Resources/* to cef2go/Release
 4. Run build.bat in the directory
 5. Copy conf/manifest.json to bin directory
-6. Run goapp.exe in bin directory
+6. Run gapp.exe in bin directory
 
 关于:
 -------------------

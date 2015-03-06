@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/nvsoft/cef"
-	"github.com/nvsoft/goapp/navigator"
-	"github.com/nvsoft/goapp/sendinput"
+	"github.com/nvsoft/gapp/navigator"
+	"github.com/nvsoft/gapp/sendinput"
 	"github.com/nvsoft/win"
 	"strings"
 	"syscall"

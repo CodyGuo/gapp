@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/nvsoft/cef"
-	//"github.com/nvsoft/win"
-	"github.com/nvsoft/goapp/navigator"
+	"github.com/nvsoft/gapp/navigator"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
-	//"syscall"
-	"io/ioutil"
 	"time"
 )
 

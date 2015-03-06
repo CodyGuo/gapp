@@ -3,7 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"github.com/nvsoft/goapp/util"
+	"github.com/nvsoft/gapp/util"
 	"io/ioutil"
 	"path"
 	"reflect"

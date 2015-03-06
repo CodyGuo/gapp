@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nvsoft/cef"
-	"github.com/nvsoft/goapp/config"
+	"github.com/nvsoft/gapp/config"
 	"github.com/nvsoft/win"
 	"net/http"
 	"os"
@@ -16,7 +16,7 @@ import (
 
 const (
 	ICON_MAIN       = 100
-	nguiWindowClass = `\o/ Goapp_Window_Class \o/`
+	nguiWindowClass = `\o/ Gapp_Window_Class \o/`
 )
 
 var (

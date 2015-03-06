@@ -3,14 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/nvsoft/cef"
-	"github.com/nvsoft/win"
-	"unsafe"
-	//"time"
 	"github.com/nvsoft/goapp/navigator"
+	"github.com/nvsoft/goapp/sendinput"
+	"github.com/nvsoft/win"
+	"strings"
 	"syscall"
 	"time"
-    "strings"
+	"unsafe"
 )
+
+const spec_chars = "!@#$%^&*()"
+const base_chars = "1234567890"
 
 func init() {
 	cef.RegisterV8CallbackHandler("start", win_start_browser)
@@ -86,28 +89,6 @@ func win_emuClick(browser *cef.Browser, message *cef.CefProcessMessage) interfac
 				input.Mi.Time = 0
 				win.SendInput(2, unsafe.Pointer(&input), int32(unsafe.Sizeof(input)))
 
-				/*var input win.MOUSE_INPUT
-				  var input win.Input
-				  input.type = INPUT_MOUSE
-				  input.mi.dx=0
-				  input.mi.dy=0
-				  input.mi.dwFlags=(MOUSEEVENTF_ABSOLUTE|MOUSEEVENTF_MOVE|MOUSEEVENTF_RIGHTDOWN|MOUSEEVENTF_RIGHTUP)
-				  input.mi.mouseData=0
-				  input.mi.dwExtraInfo=NULL
-				  input.mi.time=0
-				  win.SendInput(1,&input,sizeof(INPUT))*/
-
-				/*hWnd = win.WindowFromPoint(pt)
-								lParam := uintptr(win.MAKELONG(uint16(pt.X), uint16(pt.Y)))
-				                if buttonType {
-				                    win.SendMessage(hWnd, win.WM_RBUTTONDOWN, 0, lParam) //WM_LBUTTONDOWN
-				                    time.Sleep(50 * time.Millisecond)
-				                    win.SendMessage(hWnd, win.WM_RBUTTONUP, 0, lParam)
-				                } else {
-				                    win.SendMessage(hWnd, win.WM_LBUTTONDOWN, 0, lParam) //WM_LBUTTONDOWN
-				                    time.Sleep(50 * time.Millisecond)
-				                    win.SendMessage(hWnd, win.WM_LBUTTONUP, 0, lParam)
-				                }*/
 				fmt.Printf("点击")
 			}()
 			//hWnd = win.WindowFromPoint(pt)
@@ -147,23 +128,93 @@ func win_emuInput(browser *cef.Browser, message *cef.CefProcessMessage) interfac
 
 				fmt.Printf("ClientToScreen X=%v Y=%v\n", pt.X, pt.Y)
 
-                ss := strings.Split(inputText, "")
-                for i := 0; i < len(ss); i++ {
-                    c := ss[i]
-                    char := strings.ToUpper(c)
-                    shift := false
-                    if c == char {
-                        shift = true
-                    }
-                    fmt.Printf("输入:%v %v\n", char, shift)
-                    emuInputText(c, shift)
-                }
+				//sendinput.SendString(inputText)
 
-				// http://blog.sina.com.cn/s/blog_648d306d0101gjxh.html
-				//emuInputText("f", false)
-				//emuInputText("F", true)
-				//emuInputText("@", false)
-				//emuInputText("A", true)
+				ss := strings.Split(inputText, "")
+				for i := 0; i < len(ss); i++ {
+					c := ss[i]
+					cc := []rune(c)[0]
+					keyCode := *syscall.StringToUTF16Ptr(c)
+					shift := false
+					if cc >= 'a' && cc <= 'z' {
+						fmt.Printf("小写\n")
+						c = strings.ToUpper(c)
+						keyCode = *syscall.StringToUTF16Ptr(c)
+					}
+					if cc >= 'A' && cc <= 'Z' {
+						fmt.Printf("大写\n")
+						shift = true
+					}
+					index := strings.Index(spec_chars, c)
+					if index >= 0 {
+						fmt.Printf("特殊字符1 c=%v index=%v\n", c, index)
+						ss := strings.Split(base_chars, "")
+						fmt.Printf("ss=%v\n", ss)
+						c = ss[index]
+						fmt.Printf("特殊字符2 c=%v\n", c)
+						keyCode = *syscall.StringToUTF16Ptr(c)
+						shift = true
+					}
+					switch {
+					case c == ";":
+						keyCode = win.VK_OEM_1
+					case c == ":":
+						keyCode = win.VK_OEM_1
+						shift = true
+					case c == "=":
+						keyCode = win.VK_OEM_PLUS
+					case c == "+":
+						keyCode = win.VK_OEM_PLUS
+						shift = true
+					case c == "-":
+						keyCode = win.VK_OEM_MINUS
+					case c == "_":
+						keyCode = win.VK_OEM_MINUS
+						shift = true
+					case c == ",":
+						keyCode = win.VK_OEM_COMMA
+					case c == "<":
+						keyCode = win.VK_OEM_COMMA
+						shift = true
+					case c == ".":
+						keyCode = win.VK_OEM_PERIOD
+					case c == ">":
+						keyCode = win.VK_OEM_PERIOD
+						shift = true
+					case c == "/":
+						keyCode = win.VK_OEM_2
+					case c == "?":
+						keyCode = win.VK_OEM_2
+						shift = true
+					case c == "`":
+						keyCode = win.VK_OEM_3
+					case c == "~":
+						keyCode = win.VK_OEM_3
+						shift = true
+					case c == "[":
+						keyCode = win.VK_OEM_4
+					case c == "{":
+						keyCode = win.VK_OEM_4
+						shift = true
+					case c == `\`:
+						keyCode = win.VK_OEM_5
+					case c == "|":
+						keyCode = win.VK_OEM_5
+						shift = true
+					case c == "]":
+						keyCode = win.VK_OEM_6
+					case c == "}":
+						keyCode = win.VK_OEM_6
+						shift = true
+					case c == "'":
+						keyCode = win.VK_OEM_7
+					case c == `"`:
+						keyCode = win.VK_OEM_7
+						shift = true
+					}
+					fmt.Printf("输入:%v %v\n", keyCode, shift)
+					sendinput.KeyPress(keyCode, shift)
+				}
 
 				//hWnd = win.WindowFromPoint(pt)
 
@@ -203,7 +254,7 @@ func emuInputText(c string, shift bool) {
 	input.Ki.WVk = scanKey
 	win.SendInput(1, unsafe.Pointer(&input), int32(unsafe.Sizeof(input)))
 
-    input.Type = win.INPUT_KEYBOARD
+	input.Type = win.INPUT_KEYBOARD
 	input.Ki.WVk = scanKey
 	input.Ki.DwFlags = win.KEYEVENTF_KEYUP
 	win.SendInput(1, unsafe.Pointer(&input), int32(unsafe.Sizeof(input)))

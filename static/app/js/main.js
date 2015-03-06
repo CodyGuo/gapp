@@ -55,6 +55,7 @@ app.controller("MainCtrl", ['$scope', '$rootScope', function($scope, $rootScope)
     $scope.emuInput = function() {
         var url = $scope.option.url;
         var inputText = $scope.option.inputText;
+        $scope.emuClick();
         cef.callback("emuInput", url, inputText);
     };
 }

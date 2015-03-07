@@ -26,7 +26,6 @@ var (
 
 var wndProc = syscall.NewCallback(WndProc)
 var browserSettings = cef.BrowserSettings{}
-var winHandlers map[unsafe.Pointer]win.HWND
 var windowHolders map[string]win.HWND
 
 func init() {
@@ -67,24 +66,6 @@ func main() {
 	settings.BrowserSubprocessPath = manifest.BrowserSubprocessPath()
 	//settings.RemoteDebuggingPort = 7000
 	cef.Initialize(settings)
-
-	//renderWindow := createMainWindow()
-	//renderWindow1 := createMainWindow()
-	//renderWindow1 := createMainWindow()
-
-	go func() {
-		//createMainBrowser()
-		//renderWindow := createMainWindow()
-		//createBrowser(renderWindow, manifest.FirstPage())
-		//createBrowser(renderWindow1, "http://www.sohu.com/") // http://www.baidu.com/
-	}()
-
-	/*go func() {
-	    time.Sleep(5 * time.Second)
-	    go func() {
-	        createBrowser(renderWindow1, "http://www.sohu.com/")
-	    }()
-	}()*/
 
 	//go func() {
 	//	working()
@@ -151,11 +132,7 @@ func _createRootWindow() win.HWND {
 		return win.HWND(0)
 	}
 
-	//win.MoveWindow(renderWindow, x, y, width, height, false)
-
 	fmt.Printf("CreateWindow x=%v y=%v width=%v height=%v renderWindow=%v renderWindow=%v\n", x, y, width, height, renderWindow, unsafe.Pointer(renderWindow))
-
-	//winHandlers[unsafe.Pointer(renderWindow)] = renderWindow
 
 	win.ShowWindow(renderWindow, win.SW_SHOW) //win.SW_SHOW
 	win.UpdateWindow(renderWindow)
@@ -164,7 +141,6 @@ func _createRootWindow() win.HWND {
 }
 
 func createBrowser(renderWindow win.HWND, url string) {
-	//winHandlers[unsafe.Pointer(renderWindow)] = renderWindow
 	//browser := cef.CreateBrowser(unsafe.Pointer(hwnd), &browserSettings, url, false)
 	//browserSettings := cef.BrowserSettings{}
 	cef.CreateBrowser(unsafe.Pointer(renderWindow), &browserSettings, url, false)

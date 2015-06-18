@@ -54,8 +54,16 @@ func main() {
 		startAppServer()
 	}()
 
-	cef.SetupCreateRootWindowCallback(createRootWindow)
-	cef.SetupCreateWindowCallback(createWindow)
+	cef.OnContextInitialized = func() {
+		window := createWindow()
+		createBrowser(window, manifest.FirstPage()) // http://www.baidu.com/
+	}
+
+	cef.OnOpenWindow = func(url string) {
+		window := createWindow()
+		createBrowser(window, url)
+		windowHolders[url] = window
+	}
 
 	settings := cef.Settings{}
 	//settings.SingleProcess = 1                     // 单进程模式
@@ -66,10 +74,6 @@ func main() {
 	settings.BrowserSubprocessPath = manifest.BrowserSubprocessPath()
 	//settings.RemoteDebuggingPort = 7000
 	cef.Initialize(settings)
-
-	//go func() {
-	//	working()
-	//}()
 
 	cef.RunMessageLoop()
 	cef.Shutdown()
@@ -85,18 +89,7 @@ func startAppServer() error {
 	return http.ListenAndServe(config.Config["listen_address"], nil)
 }
 
-func createWindow(url string) {
-	renderWindow := _createRootWindow()
-	createBrowser(renderWindow, url)
-	windowHolders[url] = renderWindow
-}
-
-func createRootWindow() {
-	renderWindow := _createRootWindow()
-	createBrowser(renderWindow, manifest.FirstPage()) // http://www.baidu.com/
-}
-
-func _createRootWindow() win.HWND {
+func createWindow() win.HWND {
 	var dwExStyle, dwStyle uint32 = 0, 0
 
 	dwStyle = win.WS_OVERLAPPEDWINDOW
